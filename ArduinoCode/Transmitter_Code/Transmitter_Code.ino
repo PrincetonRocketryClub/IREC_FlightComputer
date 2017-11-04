@@ -9,14 +9,9 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 // TEST TEST
-#define RFM95_CS 10
-#define RFM95_RST 0
-#define RFM95_INT 4
-
-/////* Teensy 3.x w/wing 
-//#define RFM95_RST     9   // "A"
-//#define RFM95_CS      10   // "B"
-//#define RFM95_INT     4    // "C"
+#define RFM95_CS 10   // SPI Chip Select Pin
+#define RFM95_RST 0   // Radio Reset  Pin 
+#define RFM95_INT 4   // Interrupt Capable Pin (All Pins capable on teensy)
 
 
 // Change to 434.0 or other frequency, must match RX's freq!
@@ -25,7 +20,7 @@
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-void setup() 
+void setup()
 {
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
@@ -42,6 +37,7 @@ void setup()
   digitalWrite(RFM95_RST, HIGH);
   delay(10);
 
+  // intitialize rfm95 module and test if wired correctly
   while (!rf95.init()) {
     Serial.println("LoRa radio init failed");
     while (1);
@@ -54,13 +50,14 @@ void setup()
     while (1);
   }
   Serial.print("Set Freq to: "); Serial.println(RF95_FREQ);
-  
+
   // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
 
   // The default transmitter power is 13dBm, using PA_BOOST.
-  // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then 
+  // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then
   // you can set transmitter powers from 5 to 23 dBm:
-  rf95.setTxPower(23, true);
+  // RFM95W uses PA_Boost which corresponds to false
+  rf95.setTxPower(23, false);
 }
 
 int16_t packetnum = 0;  // packet counter, we increment per xmission
@@ -69,12 +66,12 @@ void loop()
 {
   Serial.println("Sending to rf95_server");
   // Send a message to rf95_server
-  
+
   char radiopacket[20] = "Hello World #      ";
-  itoa(packetnum++, radiopacket+13, 10);
+  itoa(packetnum++, radiopacket + 13, 10);
   Serial.print("Sending "); Serial.println(radiopacket);
   radiopacket[19] = 0;
-  
+
   Serial.println("Sending..."); delay(10);
   rf95.send((uint8_t *)radiopacket, 20);
 
@@ -86,14 +83,14 @@ void loop()
 
   Serial.println("Waiting for reply..."); delay(10);
   if (rf95.waitAvailableTimeout(1000))
-  { 
-    // Should be a reply message for us now   
+  {
+    // Should be a reply message for us now
     if (rf95.recv(buf, &len))
-   {
+    {
       Serial.print("Got reply: ");
       Serial.println((char*)buf);
       Serial.print("RSSI: ");
-      Serial.println(rf95.lastRssi(), DEC);    
+      Serial.println(rf95.lastRssi(), DEC);
     }
     else
     {
@@ -106,4 +103,4 @@ void loop()
   }
   delay(1000);
 }
-    
+
