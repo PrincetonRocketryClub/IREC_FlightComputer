@@ -2,12 +2,7 @@
 
  #define VBATPIN A9
 
-void setup() {
- 
-   
-
-
-}
+void setup() {}
 
 void loop() {
   float measuredvbat = analogRead(VBATPIN);
