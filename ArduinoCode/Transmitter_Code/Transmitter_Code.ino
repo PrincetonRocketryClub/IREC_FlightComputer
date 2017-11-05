@@ -8,6 +8,7 @@
 
 #include <SPI.h>
 #include <RH_RF95.h>
+#include <RHReliableDatagram.h>
 // TEST TEST
 #define RFM95_CS 10   // SPI Chip Select Pin
 #define RFM95_RST 0   // Radio Reset  Pin 
@@ -15,7 +16,7 @@
 
 
 // Change to 434.0 or other frequency, must match RX's freq!
-#define RF95_FREQ 915.0
+#define RF95_FREQ 868.0
 
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
@@ -50,6 +51,9 @@ void setup()
     while (1);
   }
   Serial.print("Set Freq to: "); Serial.println(RF95_FREQ);
+  
+  RHReliableDatagram manager(rf95);
+  manager.init();
 
   // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
 
